@@ -8,7 +8,7 @@ export default function App() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    fetch("/wear_images_women.csv")
+    fetch("./wear_images_women.csv")
       .then(res => res.text())
       .then(text => {
         const lines = text.trim().split("\n").slice(1);
