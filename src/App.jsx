@@ -63,9 +63,7 @@ export default function App() {
 
         {/* 画像スライド */}
         <div style={{ marginTop: 20 }}>
-            <button onClick={goFirst}>⏮ 最初</button>
-            <button onClick={goPrev} disabled={index === 0}>◀ 前</button>
-
+            
             <div style={{ margin: "20px 0" }}>
             <img
                 src={url}
@@ -73,7 +71,9 @@ export default function App() {
                 style={{ transition: "0.3s ease" }}
             />
             </div>
-
+            
+            <button onClick={goFirst}>⏮ 最初</button>
+            <button onClick={goPrev} disabled={index === 0}>◀ 前</button>
             <button onClick={goNext} disabled={index === images.length - 1}>
             次 ▶
             </button>
