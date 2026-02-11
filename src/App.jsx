@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 
-const CATEGORIES = ["a","b","c","d","e","f","g","h","i","j"];
+    const CATEGORIES = [
+    "a","b","c","d","e",
+    "f","g","h","i","j",
+    "k","l","m","n","o"
+    ];
 
-export default function App() {
+    export default function App() {
     const [images, setImages] = useState([]);
     const [labels, setLabels] = useState({});
     const [index, setIndex] = useState(0);
@@ -55,7 +59,7 @@ export default function App() {
 
     return (
         <div style={{ padding: 20, textAlign: "center" }}>
-        <h1>コーデ画像分類（a〜j）</h1>
+        <h1>コーデ画像分類（a〜o）</h1>
 
         <p>
             {index + 1} / {images.length}
@@ -63,7 +67,6 @@ export default function App() {
 
         {/* 画像スライド */}
         <div style={{ marginTop: 20 }}>
-            
             <div style={{ margin: "20px 0" }}>
             <img
                 src={url}
@@ -71,7 +74,7 @@ export default function App() {
                 style={{ transition: "0.3s ease" }}
             />
             </div>
-            
+
             <button onClick={goFirst}>⏮ 最初</button>
             <button onClick={goPrev} disabled={index === 0}>◀ 前</button>
             <button onClick={goNext} disabled={index === images.length - 1}>
@@ -94,6 +97,38 @@ export default function App() {
             >
                 {cat}
             </button>
+            ))}
+        </div>
+
+        {/* 15マス表示 */}
+        <div
+            style={{
+            marginTop: 50,
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            gap: 10
+            }}
+        >
+            {CATEGORIES.map(cat => (
+            <div
+                key={cat}
+                style={{
+                border: "1px solid #ccc",
+                minHeight: 150,
+                padding: 5
+                }}
+            >
+                {Object.entries(labels)
+                .filter(([_, c]) => c === cat)
+                .map(([imgUrl]) => (
+                    <img
+                    key={imgUrl}
+                    src={imgUrl}
+                    width={60}
+                    style={{ margin: 2 }}
+                    />
+                ))}
+            </div>
             ))}
         </div>
 
