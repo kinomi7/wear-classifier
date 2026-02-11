@@ -1,156 +1,157 @@
 import { useEffect, useState } from "react";
 
-const CATEGORIES = [
-  "a","b","c","d","e",
-  "f","g","h","i","j",
-  "k","l","m","n","o"
-];
+    const CATEGORIES = [
+    "a","b","c","d","e",
+    "f","g","h","i","j",
+    "k","l","m","n","o"
+    ];
 
-export default function App() {
-  const [images, setImages] = useState([]);
-  const [labels, setLabels] = useState({});
-  const [dragged, setDragged] = useState(null);
+    export default function App() {
+    const [images, setImages] = useState([]);
+    const [labels, setLabels] = useState({});
+    const [dragged, setDragged] = useState(null);
 
-  useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
-      .then(res => res.text())
-      .then(text => {
-        const lines = text.trim().split("\n").slice(1);
-        const data = lines.map(l => l.trim()).filter(Boolean);
-        setImages(data);
-      });
-  }, []);
+    useEffect(() => {
+        fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
+        .then(res => res.text())
+        .then(text => {
+            const lines = text.trim().split("\n").slice(1);
+            const data = lines.map(l => l.trim()).filter(Boolean);
+            setImages(data);
+        });
+    }, []);
 
-  if (images.length === 0) return <div>loading...</div>;
+    if (images.length === 0) return <div>loading...</div>;
 
-  const handleDrop = (cat) => {
-    if (dragged) {
-      setLabels(prev => ({ ...prev, [dragged]: cat }));
-      setDragged(null);
-    }
-  };
+    const handleDrop = (cat) => {
+        if (dragged) {
+        setLabels(prev => ({ ...prev, [dragged]: cat }));
+        setDragged(null);
+        }
+    };
 
-  const exportCSV = () => {
-    let csv = "image_url,category\n";
-    images.forEach(url => {
-      csv += `${url},${labels[url] || ""}\n`;
-    });
+    const exportCSV = () => {
+        let csv = "image_url,category\n";
+        images.forEach(url => {
+        csv += `${url},${labels[url] || ""}\n`;
+        });
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "classified_outfits.csv";
-    a.click();
-  };
+        const blob = new Blob([csv], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "classified_outfits.csv";
+        a.click();
+    };
 
-  return (
-    <div style={{ padding: 20 }}>
+    return (
+        <div style={{ padding: 20 }}>
 
-      <h2>未分類画像</h2>
+        <h2>未分類画像</h2>
 
-      {/* ✅ 画像のみ横スクロール */}
-      <div
+    <div
+    style={{
+        width: "100vw",          // 画面幅いっぱい
+        overflowX: "auto",       // 横スクロールON
+        overflowY: "hidden",
+        border: "1px solid #ccc",
+        padding: "10px 0",
+        boxSizing: "border-box"
+    }}
+    >
+    <div
         style={{
-          width: "100%",
-          overflowX: "auto",
-          overflowY: "hidden",
-          border: "1px solid #ccc",
-          padding: 10,
-          boxSizing: "border-box"
+        display: "flex",
+        gap: 10,
+        padding: "0 20px",
+        width: "max-content"   // ← 中身は必要な分だけ横に広がる
         }}
-      >
+    >
+        {images
+        .filter(url => !labels[url])
+        .map(url => (
+            <img
+            key={url}
+            src={url}
+            width={150}
+            draggable
+            onDragStart={() => setDragged(url)}
+            style={{
+                flexShrink: 0,     // ← 縮まない
+                borderRadius: 6,
+                cursor: "grab"
+            }}
+            />
+        ))}
+    </div>
+    </div>
+
+
+        <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
+
+        {/* ✅ グリッドは固定幅中央配置 */}
         <div
-          style={{
-            display: "flex",
-            gap: 10,
-            width: "max-content"
-          }}
+            style={{
+            width: 1150,              // ← 固定幅
+            margin: "0 auto",         // ← 中央寄せ
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 220px)",
+            gridTemplateRows: "repeat(3, 220px)",
+            gap: 15
+            }}
         >
-          {images
-            .filter(url => !labels[url])
-            .map(url => (
-              <img
-                key={url}
-                src={url}
-                width={140}
-                draggable
-                onDragStart={() => setDragged(url)}
+            {CATEGORIES.map(cat => (
+            <div
+                key={cat}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDrop(cat)}
                 style={{
-                  flexShrink: 0,
-                  cursor: "grab",
-                  borderRadius: 6
+                width: 220,
+                height: 220,
+                border: "2px solid #888",
+                position: "relative",
+                overflowY: "auto",
+                background: "#fafafa",
+                boxSizing: "border-box",
+                paddingTop: 25
                 }}
-              />
+            >
+                {/* アルファベット */}
+                <div
+                style={{
+                    position: "absolute",
+                    top: 5,
+                    left: 10,
+                    fontWeight: "bold",
+                    fontSize: 18
+                }}
+                >
+                {cat}
+                </div>
+
+                {Object.entries(labels)
+                .filter(([_, c]) => c === cat)
+                .map(([url]) => (
+                    <img
+                    key={url}
+                    src={url}
+                    width={70}
+                    draggable
+                    onDragStart={() => setDragged(url)}
+                    style={{
+                        margin: 4,
+                        borderRadius: 4,
+                        cursor: "grab"
+                    }}
+                    />
+                ))}
+            </div>
             ))}
         </div>
-      </div>
 
-      <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
+        <div style={{ marginTop: 40, textAlign: "center" }}>
+            <button onClick={exportCSV}>CSVとして送信</button>
+        </div>
 
-      {/* ✅ グリッドは固定幅中央配置 */}
-      <div
-        style={{
-          width: 1150,              // ← 固定幅
-          margin: "0 auto",         // ← 中央寄せ
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 220px)",
-          gridTemplateRows: "repeat(3, 220px)",
-          gap: 15
-        }}
-      >
-        {CATEGORIES.map(cat => (
-          <div
-            key={cat}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => handleDrop(cat)}
-            style={{
-              width: 220,
-              height: 220,
-              border: "2px solid #888",
-              position: "relative",
-              overflowY: "auto",
-              background: "#fafafa",
-              boxSizing: "border-box",
-              paddingTop: 25
-            }}
-          >
-            {/* アルファベット */}
-            <div
-              style={{
-                position: "absolute",
-                top: 5,
-                left: 10,
-                fontWeight: "bold",
-                fontSize: 18
-              }}
-            >
-              {cat}
-            </div>
-
-            {Object.entries(labels)
-              .filter(([_, c]) => c === cat)
-              .map(([url]) => (
-                <img
-                  key={url}
-                  src={url}
-                  width={70}
-                  draggable
-                  onDragStart={() => setDragged(url)}
-                  style={{
-                    margin: 4,
-                    borderRadius: 4,
-                    cursor: "grab"
-                  }}
-                />
-              ))}
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginTop: 40, textAlign: "center" }}>
-        <button onClick={exportCSV}>CSVとして送信</button>
-      </div>
-
-    </div>
-  );
+        </div>
+    );
 }
