@@ -59,7 +59,7 @@ import { useEffect, useState } from "react";
 
     return (
         <div style={{ padding: 20, textAlign: "center" }}>
-        <h1>コーデ画像分類（a〜o）</h1>
+        {/* <h1>コーデ画像分類（a〜o）</h1> */}
 
         <p>
             {index + 1} / {images.length}
