@@ -25,6 +25,21 @@ export default function App() {
         setLabels(prev => ({ ...prev, [url]: cat }));
     };
 
+    const goNext = () => {
+        if (index < images.length - 1) {
+        setIndex(index + 1);
+        }
+    };
+
+    const goPrev = () => {
+        if (index > 0) {
+        setIndex(index - 1);
+        }
+    };
+
+    const goFirst = () => setIndex(0);
+    const goLast = () => setIndex(images.length - 1);
+
     const exportCSV = () => {
         let csv = "image_url,category\n";
         images.forEach(url => {
@@ -46,19 +61,26 @@ export default function App() {
             {index + 1} / {images.length}
         </p>
 
-        <input
-            type="range"
-            min="0"
-            max={images.length - 1}
-            value={index}
-            onChange={e => setIndex(Number(e.target.value))}
-            style={{ width: "80%" }}
-        />
-
+        {/* 画像スライド */}
         <div style={{ marginTop: 20 }}>
-            <img src={url} width={300} />
+            <button onClick={goFirst}>⏮ 最初</button>
+            <button onClick={goPrev} disabled={index === 0}>◀ 前</button>
+
+            <div style={{ margin: "20px 0" }}>
+            <img
+                src={url}
+                width={300}
+                style={{ transition: "0.3s ease" }}
+            />
+            </div>
+
+            <button onClick={goNext} disabled={index === images.length - 1}>
+            次 ▶
+            </button>
+            <button onClick={goLast}>最後 ⏭</button>
         </div>
 
+        {/* カテゴリボタン */}
         <div style={{ marginTop: 10 }}>
             {CATEGORIES.map(cat => (
             <button
