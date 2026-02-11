@@ -23,6 +23,13 @@ export default function App() {
 
   if (images.length === 0) return <div>loading...</div>;
 
+  const handleDrop = (cat) => {
+    if (dragged) {
+      setLabels(prev => ({ ...prev, [dragged]: cat }));
+      setDragged(null);
+    }
+  };
+
   const exportCSV = () => {
     let csv = "image_url,category\n";
     images.forEach(url => {
@@ -36,19 +43,12 @@ export default function App() {
     a.click();
   };
 
-  const handleDrop = (cat) => {
-    if (dragged) {
-      setLabels(prev => ({ ...prev, [dragged]: cat }));
-      setDragged(null);
-    }
-  };
-
   return (
     <div style={{ padding: 20 }}>
 
-      <h2>未分類画像（横スクロール）</h2>
+      <h2>未分類画像</h2>
 
-      {/* 横スライドエリア */}
+      {/* ✅ 横スクロールはここだけ */}
       <div
         style={{
           display: "flex",
@@ -56,7 +56,7 @@ export default function App() {
           gap: 10,
           padding: 10,
           border: "1px solid #ddd",
-          whiteSpace: "nowrap"
+          marginBottom: 40
         }}
       >
         {images
@@ -77,13 +77,16 @@ export default function App() {
           ))}
       </div>
 
-      <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
+      <h2>分類グリッド</h2>
 
+      {/* ✅ グリッドは固定サイズ */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: 10
+          gridTemplateColumns: "repeat(5, 220px)",
+          gridTemplateRows: "repeat(3, 220px)",
+          gap: 15,
+          justifyContent: "center"
         }}
       >
         {CATEGORIES.map(cat => (
@@ -92,32 +95,51 @@ export default function App() {
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => handleDrop(cat)}
             style={{
-              border: "2px solid #ccc",
-              minHeight: 160,
-              padding: 5
+              width: 220,
+              height: 220,
+              border: "2px solid #aaa",
+              position: "relative",
+              overflowY: "auto",  // ← マス内だけ縦スクロール
+              padding: 5,
+              boxSizing: "border-box"
             }}
           >
-            {Object.entries(labels)
-              .filter(([_, c]) => c === cat)
-              .map(([url]) => (
-                <img
-                  key={url}
-                  src={url}
-                  width={80}
-                  draggable
-                  onDragStart={() => setDragged(url)}
-                  style={{
-                    margin: 4,
-                    cursor: "grab",
-                    borderRadius: 4
-                  }}
-                />
-              ))}
+            {/* アルファベット表示 */}
+            <div
+              style={{
+                position: "absolute",
+                top: 5,
+                left: 8,
+                fontWeight: "bold",
+                fontSize: 18
+              }}
+            >
+              {cat}
+            </div>
+
+            <div style={{ marginTop: 25 }}>
+              {Object.entries(labels)
+                .filter(([_, c]) => c === cat)
+                .map(([url]) => (
+                  <img
+                    key={url}
+                    src={url}
+                    width={70}
+                    draggable
+                    onDragStart={() => setDragged(url)}
+                    style={{
+                      margin: 4,
+                      borderRadius: 4,
+                      cursor: "grab"
+                    }}
+                  />
+                ))}
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: 40 }}>
+      <div style={{ marginTop: 40, textAlign: "center" }}>
         <button onClick={exportCSV}>CSVとして送信</button>
       </div>
     </div>
