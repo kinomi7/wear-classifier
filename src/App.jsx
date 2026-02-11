@@ -48,45 +48,54 @@ export default function App() {
 
       <h2>未分類画像</h2>
 
-      {/* ✅ 横スクロールはここだけ */}
+      {/* ✅ 画像のみ横スクロール */}
       <div
         style={{
-          display: "flex",
+          width: "100%",
           overflowX: "auto",
-          gap: 10,
+          overflowY: "hidden",
+          border: "1px solid #ccc",
           padding: 10,
-          border: "1px solid #ddd",
-          marginBottom: 40
+          boxSizing: "border-box"
         }}
       >
-        {images
-          .filter(url => !labels[url])
-          .map(url => (
-            <img
-              key={url}
-              src={url}
-              width={140}
-              draggable
-              onDragStart={() => setDragged(url)}
-              style={{
-                cursor: "grab",
-                flexShrink: 0,
-                borderRadius: 6
-              }}
-            />
-          ))}
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            width: "max-content"
+          }}
+        >
+          {images
+            .filter(url => !labels[url])
+            .map(url => (
+              <img
+                key={url}
+                src={url}
+                width={140}
+                draggable
+                onDragStart={() => setDragged(url)}
+                style={{
+                  flexShrink: 0,
+                  cursor: "grab",
+                  borderRadius: 6
+                }}
+              />
+            ))}
+        </div>
       </div>
 
-      <h2>分類グリッド</h2>
+      <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
 
-      {/* ✅ グリッドは固定サイズ */}
+      {/* ✅ グリッドは固定幅中央配置 */}
       <div
         style={{
+          width: 1150,              // ← 固定幅
+          margin: "0 auto",         // ← 中央寄せ
           display: "grid",
           gridTemplateColumns: "repeat(5, 220px)",
           gridTemplateRows: "repeat(3, 220px)",
-          gap: 15,
-          justifyContent: "center"
+          gap: 15
         }}
       >
         {CATEGORIES.map(cat => (
@@ -97,19 +106,20 @@ export default function App() {
             style={{
               width: 220,
               height: 220,
-              border: "2px solid #aaa",
+              border: "2px solid #888",
               position: "relative",
-              overflowY: "auto",  // ← マス内だけ縦スクロール
-              padding: 5,
-              boxSizing: "border-box"
+              overflowY: "auto",
+              background: "#fafafa",
+              boxSizing: "border-box",
+              paddingTop: 25
             }}
           >
-            {/* アルファベット表示 */}
+            {/* アルファベット */}
             <div
               style={{
                 position: "absolute",
                 top: 5,
-                left: 8,
+                left: 10,
                 fontWeight: "bold",
                 fontSize: 18
               }}
@@ -117,24 +127,22 @@ export default function App() {
               {cat}
             </div>
 
-            <div style={{ marginTop: 25 }}>
-              {Object.entries(labels)
-                .filter(([_, c]) => c === cat)
-                .map(([url]) => (
-                  <img
-                    key={url}
-                    src={url}
-                    width={70}
-                    draggable
-                    onDragStart={() => setDragged(url)}
-                    style={{
-                      margin: 4,
-                      borderRadius: 4,
-                      cursor: "grab"
-                    }}
-                  />
-                ))}
-            </div>
+            {Object.entries(labels)
+              .filter(([_, c]) => c === cat)
+              .map(([url]) => (
+                <img
+                  key={url}
+                  src={url}
+                  width={70}
+                  draggable
+                  onDragStart={() => setDragged(url)}
+                  style={{
+                    margin: 4,
+                    borderRadius: 4,
+                    cursor: "grab"
+                  }}
+                />
+              ))}
           </div>
         ))}
       </div>
@@ -142,6 +150,7 @@ export default function App() {
       <div style={{ marginTop: 40, textAlign: "center" }}>
         <button onClick={exportCSV}>CSVとして送信</button>
       </div>
+
     </div>
   );
 }
