@@ -23,7 +23,6 @@ export default function App() {
 
   if (images.length === 0) return <div>loading...</div>;
 
-  // CSV出力（変更なし）
   const exportCSV = () => {
     let csv = "image_url,category\n";
     images.forEach(url => {
@@ -37,7 +36,6 @@ export default function App() {
     a.click();
   };
 
-  // ドロップ処理
   const handleDrop = (cat) => {
     if (dragged) {
       setLabels(prev => ({ ...prev, [dragged]: cat }));
@@ -48,15 +46,17 @@ export default function App() {
   return (
     <div style={{ padding: 20 }}>
 
-      <h2>未分類画像（ドラッグして配置）</h2>
+      <h2>未分類画像（横スクロール）</h2>
 
-      {/* 上部：未分類 */}
+      {/* 横スライドエリア */}
       <div
         style={{
           display: "flex",
-          flexWrap: "wrap",
+          overflowX: "auto",
           gap: 10,
-          marginBottom: 40
+          padding: 10,
+          border: "1px solid #ddd",
+          whiteSpace: "nowrap"
         }}
       >
         {images
@@ -65,17 +65,20 @@ export default function App() {
             <img
               key={url}
               src={url}
-              width={100}
+              width={140}
               draggable
               onDragStart={() => setDragged(url)}
-              style={{ cursor: "grab" }}
+              style={{
+                cursor: "grab",
+                flexShrink: 0,
+                borderRadius: 6
+              }}
             />
           ))}
       </div>
 
-      <h2>分類グリッド</h2>
+      <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
 
-      {/* 下部：15マス */}
       <div
         style={{
           display: "grid",
@@ -103,7 +106,11 @@ export default function App() {
                   width={80}
                   draggable
                   onDragStart={() => setDragged(url)}
-                  style={{ margin: 4, cursor: "grab" }}
+                  style={{
+                    margin: 4,
+                    cursor: "grab",
+                    borderRadius: 4
+                  }}
                 />
               ))}
           </div>
