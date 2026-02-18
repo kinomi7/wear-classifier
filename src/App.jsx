@@ -48,10 +48,13 @@ import { useEffect, useState } from "react";
 
         <h2>未分類画像</h2>
 
+    <h2>未分類画像</h2>
+
     <div
     style={{
-        width: "100%",          // 画面幅いっぱい
-        overflowX: "auto",       // 横スクロールON
+        width: "100%",          // ← 親に合わせる
+        maxWidth: "100%",       // ← はみ出し防止
+        overflowX: "auto",      // ← 横スクロールはここだけ
         overflowY: "hidden",
         border: "1px solid #ccc",
         padding: "10px 0",
@@ -61,9 +64,9 @@ import { useEffect, useState } from "react";
     <div
         style={{
         display: "flex",
-        gap: 10,
+        gap: 12,
         padding: "0 20px",
-        width: "max-content"   // ← 中身は必要な分だけ横に広がる
+        width: "max-content"  // ← 画像数に応じて横伸び
         }}
     >
         {images
@@ -72,11 +75,11 @@ import { useEffect, useState } from "react";
             <img
             key={url}
             src={url}
-            width={150}
+            width={160}
             draggable
             onDragStart={() => setDragged(url)}
             style={{
-                flexShrink: 0,     // ← 縮まない
+                flexShrink: 0,    // ← 縮まない
                 borderRadius: 6,
                 cursor: "grab"
             }}
@@ -84,6 +87,7 @@ import { useEffect, useState } from "react";
         ))}
     </div>
     </div>
+
 
 
         <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
