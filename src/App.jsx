@@ -50,7 +50,7 @@ import { useEffect, useState } from "react";
 
     <div
     style={{
-        width: "100vw",          // 画面幅いっぱい
+        width: "100%",          // 画面幅いっぱい
         overflowX: "auto",       // 横スクロールON
         overflowY: "hidden",
         border: "1px solid #ccc",
