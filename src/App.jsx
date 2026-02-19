@@ -116,8 +116,9 @@ import { useEffect, useState } from "react";
                 gridTemplateRows: "repeat(3, 220px)",
                 gap: "15px",
 
+                backgroundColor: "red",
                 backgroundImage: "url('/grid-bg.png')",
-                backgroundSize: "cover",        // ぴったり埋める
+                backgroundSize: "cover",       // ぴったり埋める
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat"
                 }}
