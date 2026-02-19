@@ -109,13 +109,19 @@ import { useEffect, useState } from "react";
             {/* ✅ グリッドは固定幅中央配置 */}
             <div
                 style={{
-                width: 1150,              // ← 固定幅
-                margin: "0 auto",         // ← 中央寄せ
+                width: 1150,
+                margin: "0px auto",
                 display: "grid",
-                gridTemplateColumns: "repeat(5, 220px)",
+                gridTemplateColumns: "repeat(5, 1fr)",
                 gridTemplateRows: "repeat(3, 220px)",
-                gap: 15
+                gap: "15px",
+
+                backgroundImage: "url('/grid-bg.png')",
+                backgroundSize: "cover",        // ぴったり埋める
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat"
                 }}
+                
             >
                 {CATEGORIES.map(cat => (
                 <div
