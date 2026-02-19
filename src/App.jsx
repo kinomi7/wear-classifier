@@ -44,118 +44,132 @@ import { useEffect, useState } from "react";
     };
 
     return (
-        <div style={{ padding: 20 }}>
-
-        <h2>未分類画像</h2>
-
-    <h2>未分類画像</h2>
-
-    <div
+  <div
     style={{
-        width: "100%",          // ← 親に合わせる
-        maxWidth: "100%",       // ← はみ出し防止
-        overflowX: "auto",      // ← 横スクロールはここだけ
-        overflowY: "hidden",
-        border: "1px solid #ccc",
-        padding: "10px 0",
-        boxSizing: "border-box"
+      width: "100%",
+      display: "flex",
+      justifyContent: "center"
     }}
-    >
+  >
     <div
-        style={{
-        display: "flex",
-        gap: 12,
-        padding: "0 20px",
-        width: "max-content"  // ← 画像数に応じて横伸び
-        }}
+      style={{
+        width: "100%",
+        maxWidth: 1400,   // ← 最大幅だけ制限
+        padding: "20px",
+        boxSizing: "border-box"
+      }}
     >
-        {images
-        .filter(url => !labels[url])
-        .map(url => (
-            <img
-            key={url}
-            src={url}
-            width={160}
-            draggable
-            onDragStart={() => setDragged(url)}
-            style={{
-                flexShrink: 0,    // ← 縮まない
-                borderRadius: 6,
-                cursor: "grab"
-            }}
-            />
-        ))}
-    </div>
-    </div>
 
+            <h2>未分類画像</h2>
 
+            <h2>未分類画像</h2>
 
-        <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
-
-        {/* ✅ グリッドは固定幅中央配置 */}
-        <div
-            style={{
-            width: 1150,              // ← 固定幅
-            margin: "0 auto",         // ← 中央寄せ
-            display: "grid",
-            gridTemplateColumns: "repeat(5, 220px)",
-            gridTemplateRows: "repeat(3, 220px)",
-            gap: 15
-            }}
-        >
-            {CATEGORIES.map(cat => (
             <div
-                key={cat}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDrop(cat)}
+            style={{
+                width: "100%",          // ← 親に合わせる
+                maxWidth: "100%",       // ← はみ出し防止
+                overflowX: "auto",      // ← 横スクロールはここだけ
+                overflowY: "hidden",
+                border: "1px solid #ccc",
+                padding: "10px 0",
+                boxSizing: "border-box"
+            }}
+            >
+                <div
+                    style={{
+                    display: "flex",
+                    gap: 12,
+                    padding: "0 20px",
+                    width: "max-content"  // ← 画像数に応じて横伸び
+                    }}
+                >
+                    {images
+                    .filter(url => !labels[url])
+                    .map(url => (
+                        <img
+                        key={url}
+                        src={url}
+                        width={160}
+                        draggable
+                        onDragStart={() => setDragged(url)}
+                        style={{
+                            flexShrink: 0,    // ← 縮まない
+                            borderRadius: 6,
+                            cursor: "grab"
+                        }}
+                        />
+                    ))}
+                </div>
+            </div>
+
+
+
+            <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
+
+            {/* ✅ グリッドは固定幅中央配置 */}
+            <div
                 style={{
-                width: 220,
-                height: 220,
-                border: "2px solid #888",
-                position: "relative",
-                overflowY: "auto",
-                background: "#fafafa",
-                boxSizing: "border-box",
-                paddingTop: 25
+                width: 1150,              // ← 固定幅
+                margin: "0 auto",         // ← 中央寄せ
+                display: "grid",
+                gridTemplateColumns: "repeat(5, 220px)",
+                gridTemplateRows: "repeat(3, 220px)",
+                gap: 15
                 }}
             >
-                {/* アルファベット */}
+                {CATEGORIES.map(cat => (
                 <div
-                style={{
-                    position: "absolute",
-                    top: 5,
-                    left: 10,
-                    fontWeight: "bold",
-                    fontSize: 18
-                }}
-                >
-                {cat}
-                </div>
-
-                {Object.entries(labels)
-                .filter(([_, c]) => c === cat)
-                .map(([url]) => (
-                    <img
-                    key={url}
-                    src={url}
-                    width={70}
-                    draggable
-                    onDragStart={() => setDragged(url)}
+                    key={cat}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(cat)}
                     style={{
-                        margin: 4,
-                        borderRadius: 4,
-                        cursor: "grab"
+                    width: 220,
+                    height: 220,
+                    border: "2px solid #888",
+                    position: "relative",
+                    overflowY: "auto",
+                    background: "#fafafa",
+                    boxSizing: "border-box",
+                    paddingTop: 25
                     }}
-                    />
+                >
+                    {/* アルファベット */}
+                    <div
+                    style={{
+                        position: "absolute",
+                        top: 5,
+                        left: 10,
+                        fontWeight: "bold",
+                        fontSize: 18
+                    }}
+                    >
+                    {cat}
+                    </div>
+
+                    {Object.entries(labels)
+                    .filter(([_, c]) => c === cat)
+                    .map(([url]) => (
+                        <img
+                        key={url}
+                        src={url}
+                        width={70}
+                        draggable
+                        onDragStart={() => setDragged(url)}
+                        style={{
+                            margin: 4,
+                            borderRadius: 4,
+                            cursor: "grab"
+                        }}
+                        />
+                    ))}
+                </div>
                 ))}
             </div>
-            ))}
-        </div>
 
-        <div style={{ marginTop: 40, textAlign: "center" }}>
-            <button onClick={exportCSV}>CSVとして送信</button>
+            <div style={{ marginTop: 40, textAlign: "center" }}>
+                <button onClick={exportCSV}>CSVとして送信</button>
+            </div>
         </div>
-
         </div>
     );
 }
