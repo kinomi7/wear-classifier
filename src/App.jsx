@@ -114,7 +114,7 @@ export default function App() {
                         padding: "10px",             // ← 周囲10pxぶん
 
                         backgroundImage: "url('/grid-bg.png')",
-                        backgroundSize: "100% 100%",
+                        backgroundSize: "cover",
                         backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
                     }}
