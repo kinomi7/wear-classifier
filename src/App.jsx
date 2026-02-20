@@ -113,6 +113,7 @@ export default function App() {
                         margin: "0 auto",
                         padding: "10px",             // ← 周囲10pxぶん
 
+                        backgroundColor: "red",
                         backgroundImage: "url('/grid-bg.png')",
                         backgroundSize: "cover",
                         backgroundPosition: "center",
