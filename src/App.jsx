@@ -113,10 +113,10 @@ export default function App() {
                         margin: "0 auto",
                         padding: "20px",             // ← 周囲10pxぶん
 
-                        backgroundColor: "red",
-                        backgroundImage: "url('/grid-bg.png')",
+                        // backgroundColor: "red",
+                        backgroundImage: `url(${import.meta.env.BASE_URL}grid-bg.png)`,
                         backgroundSize: "cover",
-                        backgroundPosition: "center",
+                        // backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
                     }}
                 >
@@ -145,7 +145,7 @@ export default function App() {
                                     paddingTop: 25
                                 }}
                             >
-                                {/* アルファベット */}
+                                {/* アルファベット
                                 <div
                                     style={{
                                         position: "absolute",
@@ -156,7 +156,7 @@ export default function App() {
                                     }}
                                 >
                                     {cat}
-                                </div>
+                                </div> */}
 
                                 {Object.entries(labels)
                                     .filter(([_, c]) => c === cat)
