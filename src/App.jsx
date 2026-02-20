@@ -111,12 +111,11 @@ export default function App() {
                     style={{
                         width: 1170,                 // 1150 + 20px
                         margin: "0 auto",
-                        padding: "20px",             // ← 周囲10pxぶん
+                        padding: "100px",             // ← 周囲
 
-                        // backgroundColor: "red",
                         backgroundImage: `url(${import.meta.env.BASE_URL}grid-bg.png)`,
                         backgroundSize: "cover",
-                        // backgroundPosition: "center",
+                        backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
                     }}
                 >
