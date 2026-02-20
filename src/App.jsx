@@ -73,7 +73,6 @@ function UnclassifiedArea({ children }) {
 
     return (
         <div
-            ref={setNodeRef}
             style={{
                 width: "100%",
                 overflowX: "auto",
@@ -84,11 +83,13 @@ function UnclassifiedArea({ children }) {
             }}
         >
             <div
+                ref={setNodeRef}   // 🔥 ここに付ける
                 style={{
                     display: "flex",
                     gap: 12,
                     padding: "0 20px",
-                    width: "max-content"
+                    width: "max-content",
+                    minHeight: 180   // 🔥 高さを確保（重要）
                 }}
             >
                 {children}
@@ -96,6 +97,7 @@ function UnclassifiedArea({ children }) {
         </div>
     );
 }
+
 
 /* ---------------- main app ---------------- */
 
