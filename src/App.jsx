@@ -3,6 +3,7 @@ import {
     DndContext,
     useDraggable,
     useDroppable,
+    DragOverlay,
     useSensor,
     useSensors,
     PointerSensor,
@@ -70,15 +71,16 @@ function DroppableCell({ id, children }) {
 export default function App() {
     const [images, setImages] = useState([]);
     const [labels, setLabels] = useState({});
+    const [activeId, setActiveId] = useState(null);
     const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor, {
-        activationConstraint: {
-            delay: 150,       // 長押し150msでドラッグ開始
-            tolerance: 5
-        }
-    })
-);
+        useSensor(PointerSensor),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 150,       // 長押し150msでドラッグ開始
+                tolerance: 5
+            }
+        })
+    );
 
     useEffect(() => {
         fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
@@ -117,7 +119,24 @@ export default function App() {
     };
 
     return (
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <DndContext
+            sensors={sensors}
+            onDragStart={(event) => {
+                setActiveId(event.active.id);
+            }}
+            onDragEnd={(event) => {
+                const { active, over } = event;
+
+                if (over) {
+                    setLabels(prev => ({
+                        ...prev,
+                        [active.id]: over.id
+                    }));
+                }
+
+                setActiveId(null);
+            }}
+        >
             <div
                 style={{
                     width: "100%",
@@ -212,6 +231,17 @@ export default function App() {
                     </div>
                 </div>
             </div>
+            <DragOverlay>
+                {activeId ? (
+                    <img
+                        src={activeId}
+                        style={{
+                            width: 160,
+                            borderRadius: 6
+                        }}
+                    />
+                ) : null}
+            </DragOverlay>
         </DndContext>
     );
 }
