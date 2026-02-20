@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import {
+    DndContext,
+    useDraggable,
+    useDroppable
+} from "@dnd-kit/core";
 
 const CATEGORIES = [
     "a", "b", "c", "d", "e",
@@ -6,10 +11,61 @@ const CATEGORIES = [
     "k", "l", "m", "n", "o"
 ];
 
+/* ---------------- draggable image ---------------- */
+
+function DraggableImage({ id, src, size = 160 }) {
+    const { attributes, listeners, setNodeRef, transform } =
+        useDraggable({ id });
+
+    const style = {
+        width: size,
+        transform: transform
+            ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+            : undefined,
+        touchAction: "none", // ← スマホ必須
+        borderRadius: 6,
+        cursor: "grab"
+    };
+
+    return (
+        <img
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            src={src}
+            style={style}
+        />
+    );
+}
+
+/* ---------------- droppable cell ---------------- */
+
+function DroppableCell({ id, children }) {
+    const { setNodeRef } = useDroppable({ id });
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={{
+                width: 220,
+                height: 220,
+                border: "2px solid #888",
+                overflowY: "auto",
+                background: "#fafafa",
+                boxSizing: "border-box",
+                padding: 8
+            }}
+        >
+            {children}
+        </div>
+    );
+}
+
+/* ---------------- main app ---------------- */
+
 export default function App() {
     const [images, setImages] = useState([]);
     const [labels, setLabels] = useState({});
-    const [dragged, setDragged] = useState(null);
 
     useEffect(() => {
         fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
@@ -23,10 +79,14 @@ export default function App() {
 
     if (images.length === 0) return <div>loading...</div>;
 
-    const handleDrop = (cat) => {
-        if (dragged) {
-            setLabels(prev => ({ ...prev, [dragged]: cat }));
-            setDragged(null);
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+
+        if (over) {
+            setLabels(prev => ({
+                ...prev,
+                [active.id]: over.id
+            }));
         }
     };
 
@@ -44,144 +104,101 @@ export default function App() {
     };
 
     return (
-        <div
-            style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center"
-            }}
-        >
+        <DndContext onDragEnd={handleDragEnd}>
             <div
                 style={{
                     width: "100%",
-                    maxWidth: 1400,   // ← 最大幅だけ制限
-                    padding: "20px",
-                    boxSizing: "border-box"
+                    display: "flex",
+                    justifyContent: "center"
                 }}
             >
-
-                <h2>未分類画像</h2>
-
-                <h2>未分類画像</h2>
-
                 <div
                     style={{
-                        width: "100%",          // ← 親に合わせる
-                        maxWidth: "100%",       // ← はみ出し防止
-                        overflowX: "auto",      // ← 横スクロールはここだけ
-                        overflowY: "hidden",
-                        border: "1px solid #ccc",
-                        padding: "10px 0",
+                        width: "100%",
+                        maxWidth: 1400,
+                        padding: 20,
                         boxSizing: "border-box"
                     }}
                 >
+                    <h2>未分類画像</h2>
+
+                    {/* 横スクロール画像エリア */}
                     <div
                         style={{
-                            display: "flex",
-                            gap: 12,
-                            padding: "0 20px",
-                            width: "max-content"  // ← 画像数に応じて横伸び
+                            width: "100%",
+                            overflowX: "auto",
+                            overflowY: "hidden",
+                            border: "1px solid #ccc",
+                            padding: "10px 0",
+                            boxSizing: "border-box"
                         }}
                     >
-                        {images
-                            .filter(url => !labels[url])
-                            .map(url => (
-                                <img
-                                    key={url}
-                                    src={url}
-                                    width={160}
-                                    draggable
-                                    onDragStart={() => setDragged(url)}
-                                    style={{
-                                        flexShrink: 0,    // ← 縮まない
-                                        borderRadius: 6,
-                                        cursor: "grab"
-                                    }}
-                                />
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: 12,
+                                padding: "0 20px",
+                                width: "max-content"
+                            }}
+                        >
+                            {images
+                                .filter(url => !labels[url])
+                                .map(url => (
+                                    <DraggableImage
+                                        key={url}
+                                        id={url}
+                                        src={url}
+                                        size={160}
+                                    />
+                                ))}
+                        </div>
+                    </div>
+
+                    <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
+
+                    {/* 背景付きグリッド */}
+                    <div
+                        style={{
+                            width: 1170,
+                            margin: "0 auto",
+                            padding: 20,
+                            backgroundImage: `url(${import.meta.env.BASE_URL}grid-bg.png)`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat"
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: 1150,
+                                display: "grid",
+                                gridTemplateColumns: "repeat(5, 1fr)",
+                                gridTemplateRows: "repeat(3, 220px)",
+                                gap: 15
+                            }}
+                        >
+                            {CATEGORIES.map(cat => (
+                                <DroppableCell key={cat} id={cat}>
+                                    {Object.entries(labels)
+                                        .filter(([_, c]) => c === cat)
+                                        .map(([url]) => (
+                                            <DraggableImage
+                                                key={url}
+                                                id={url}
+                                                src={url}
+                                                size={70}
+                                            />
+                                        ))}
+                                </DroppableCell>
                             ))}
+                        </div>
                     </div>
-                </div>
 
-
-
-                <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
-
-                {/* ✅ グリッドは固定幅中央配置 */}
-                <div
-                    style={{
-                        width: 1170,                 // 1150 + 20px
-                        margin: "0 auto",
-                        padding: "70px",             // ← 周囲
-
-                        backgroundImage: `url(${import.meta.env.BASE_URL}grid-bg.png)`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                    }}
-                >
-                    <div
-                        style={{
-                            width: 1150,
-                            display: "grid",
-                            gridTemplateColumns: "repeat(5, 1fr)",
-                            gridTemplateRows: "repeat(3, 220px)",
-                            gap: "15px",
-                        }}
-                    >
-                        {CATEGORIES.map(cat => (
-                            <div
-                                key={cat}
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={() => handleDrop(cat)}
-                                style={{
-                                    width: 220,
-                                    height: 220,
-                                    border: "2px solid #888",
-                                    position: "relative",
-                                    overflowY: "auto",
-                                    background: "#fafafa",
-                                    boxSizing: "border-box",
-                                    paddingTop: 25
-                                }}
-                            >
-                                {/* アルファベット
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        top: 5,
-                                        left: 10,
-                                        fontWeight: "bold",
-                                        fontSize: 18
-                                    }}
-                                >
-                                    {cat}
-                                </div> */}
-
-                                {Object.entries(labels)
-                                    .filter(([_, c]) => c === cat)
-                                    .map(([url]) => (
-                                        <img
-                                            key={url}
-                                            src={url}
-                                            width={70}
-                                            draggable
-                                            onDragStart={() => setDragged(url)}
-                                            style={{
-                                                margin: 4,
-                                                borderRadius: 4,
-                                                cursor: "grab"
-                                            }}
-                                        />
-                                    ))}
-                            </div>
-                        ))}
+                    <div style={{ marginTop: 40, textAlign: "center" }}>
+                        <button onClick={exportCSV}>CSVとして送信</button>
                     </div>
-                </div>
-
-                <div style={{ marginTop: 40, textAlign: "center" }}>
-                    <button onClick={exportCSV}>CSVとして送信</button>
                 </div>
             </div>
-        </div>
+        </DndContext>
     );
 }
