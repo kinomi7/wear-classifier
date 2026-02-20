@@ -196,7 +196,7 @@ export default function App() {
                         style={{
                             width: 1170,
                             margin: "0 auto",
-                            padding: "50px 70px",
+                            padding: "60px 70px",
                             backgroundImage: `url(${import.meta.env.BASE_URL}grid-bg.png)`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
