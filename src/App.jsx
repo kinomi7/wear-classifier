@@ -15,16 +15,6 @@ const CATEGORIES = [
     "k", "l", "m", "n", "o"
 ];
 
-const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor, {
-        activationConstraint: {
-            delay: 150,       // 長押し150msでドラッグ開始
-            tolerance: 5
-        }
-    })
-);
-
 /* ---------------- draggable image ---------------- */
 
 function DraggableImage({ id, src, size = 160 }) {
@@ -80,6 +70,15 @@ function DroppableCell({ id, children }) {
 export default function App() {
     const [images, setImages] = useState([]);
     const [labels, setLabels] = useState({});
+    const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+        activationConstraint: {
+            delay: 150,       // 長押し150msでドラッグ開始
+            tolerance: 5
+        }
+    })
+);
 
     useEffect(() => {
         fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
