@@ -111,7 +111,7 @@ export default function App() {
                     style={{
                         width: 1170,                 // 1150 + 20px
                         margin: "0 auto",
-                        padding: "10px",             // ← 周囲10pxぶん
+                        padding: "20px",             // ← 周囲10pxぶん
 
                         backgroundColor: "red",
                         backgroundImage: "url('/grid-bg.png')",
