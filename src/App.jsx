@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import {
     DndContext,
     useDraggable,
-    useDroppable
+    useDroppable,
+    useSensor,
+    useSensors,
+    PointerSensor,
+    TouchSensor
 } from "@dnd-kit/core";
 
 const CATEGORIES = [
@@ -10,6 +14,16 @@ const CATEGORIES = [
     "f", "g", "h", "i", "j",
     "k", "l", "m", "n", "o"
 ];
+
+const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+        activationConstraint: {
+            delay: 150,       // 長押し150msでドラッグ開始
+            tolerance: 5
+        }
+    })
+);
 
 /* ---------------- draggable image ---------------- */
 
@@ -104,7 +118,7 @@ export default function App() {
     };
 
     return (
-        <DndContext onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
             <div
                 style={{
                     width: "100%",
@@ -161,7 +175,7 @@ export default function App() {
                         style={{
                             width: 1170,
                             margin: "0 auto",
-                            padding: 20,
+                            padding: 50,
                             backgroundImage: `url(${import.meta.env.BASE_URL}grid-bg.png)`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
