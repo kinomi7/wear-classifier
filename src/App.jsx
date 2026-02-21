@@ -127,6 +127,9 @@ export default function App() {
     }, []);
 
     if (images.length === 0) return <div>loading...</div>;
+    const unclassifiedCount = images.filter(url => !labels[url]).length;
+const classifiedCount = Object.keys(labels).length;
+
 
     return (
         <DndContext
@@ -175,7 +178,7 @@ export default function App() {
                         boxSizing: "border-box"
                     }}
                 >
-                    <h2>未分類画像</h2>
+                    <h2>未分類画像（{unclassifiedCount}枚）</h2>
 
                     <UnclassifiedArea>
                         {images
@@ -190,7 +193,7 @@ export default function App() {
                             ))}
                     </UnclassifiedArea>
 
-                    <h2 style={{ marginTop: 40 }}>分類グリッド</h2>
+                    <h2 style={{ marginTop: 40 }}>画像分類領域（{classifiedCount}枚）</h2>
 
                     <div
                         style={{
