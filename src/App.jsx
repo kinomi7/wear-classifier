@@ -245,7 +245,7 @@ const classifiedCount = Object.keys(labels).length;
                             a.download = "classified_outfits.csv";
                             a.click();
                         }}>
-                            CSVとして送信
+                            CSVとして保存
                         </button>
                     </div>
                 </div>
