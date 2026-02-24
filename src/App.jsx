@@ -7,7 +7,7 @@ import {
     useSensor,
     useSensors,
     PointerSensor,
-    TouchSensor
+    // TouchSensor
 } from "@dnd-kit/core";
 
 const CATEGORIES = [
@@ -107,11 +107,9 @@ export default function App() {
     const [activeId, setActiveId] = useState(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(TouchSensor, {
+        useSensor(PointerSensor,{
             activationConstraint: {
-                delay: 150,
-                tolerance: 5
+                distance: 8
             }
         })
     );
