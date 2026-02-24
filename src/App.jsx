@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useRef, useState, useEffect } from "react";
 import {
     DndContext,
     useDraggable,
@@ -7,7 +7,7 @@ import {
     useSensor,
     useSensors,
     PointerSensor,
-    // TouchSensor
+    TouchSensor
 } from "@dnd-kit/core";
 
 const CATEGORIES = [
@@ -70,30 +70,77 @@ function DroppableCell({ id, children }) {
 
 function UnclassifiedArea({ children }) {
     const { setNodeRef } = useDroppable({ id: "unclassified" });
+    const scrollRef = useRef(null);
+    const [maxScroll, setMaxScroll] = useState(0);
+    const [scrollValue, setScrollValue] = useState(0);
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        const update = () => {
+            setMaxScroll(el.scrollWidth - el.clientWidth);
+        };
+
+        update();
+        window.addEventListener("resize", update);
+        return () => window.removeEventListener("resize", update);
+    }, [children]);
+
+    const handleScroll = () => {
+        const el = scrollRef.current;
+        if (!el) return;
+        setScrollValue(el.scrollLeft);
+    };
+
+    const handleSliderChange = (e) => {
+        const value = Number(e.target.value);
+        setScrollValue(value);
+        if (scrollRef.current) {
+            scrollRef.current.scrollLeft = value;
+        }
+    };
 
     return (
-        <div
-            style={{
-                width: "100%",
-                overflowX: "auto",
-                overflowY: "hidden",
-                border: "1px solid #ccc",
-                padding: "10px 0",
-                boxSizing: "border-box"
-            }}
-        >
+        <div style={{ width: "100%" }}>
+            {/* 横スクロール本体 */}
             <div
-                ref={setNodeRef}   // 🔥 ここに付ける
+                ref={scrollRef}
+                onScroll={handleScroll}
                 style={{
-                    display: "flex",
-                    gap: 12,
-                    padding: "0 20px",
-                    width: "max-content",
-                    minHeight: 180   // 🔥 高さを確保（重要）
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    border: "1px solid #ccc",
+                    padding: "10px 0",
+                    boxSizing: "border-box"
                 }}
             >
-                {children}
+                <div
+                    ref={setNodeRef}
+                    style={{
+                        display: "flex",
+                        gap: 12,
+                        padding: "0 20px",
+                        width: "max-content",
+                        minHeight: 180
+                    }}
+                >
+                    {children}
+                </div>
             </div>
+
+            {/* 🔥 スライドバー */}
+            <input
+                type="range"
+                min="0"
+                max={maxScroll}
+                value={scrollValue}
+                onChange={handleSliderChange}
+                style={{
+                    width: "100%",
+                    marginTop: 8
+                }}
+            />
         </div>
     );
 }
@@ -107,9 +154,11 @@ export default function App() {
     const [activeId, setActiveId] = useState(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor,{
+        useSensor(PointerSensor),
+        useSensor(TouchSensor, {
             activationConstraint: {
-                distance: 8
+                delay: 150,
+                tolerance: 5
             }
         })
     );
@@ -191,7 +240,7 @@ const classifiedCount = Object.keys(labels).length;
                             ))}
                     </UnclassifiedArea>
 
-                    <h2 style={{ marginTop: 40 }}>画像分類領域（{classifiedCount}枚）</h2>
+                    <h2 style={{ marginTop: 40 }}>画像分類領域</h2>
 
                     <div
                         style={{
@@ -243,7 +292,7 @@ const classifiedCount = Object.keys(labels).length;
                             a.download = "classified_outfits.csv";
                             a.click();
                         }}>
-                            CSVとして保存
+                            CSVとして送信
                         </button>
                     </div>
                 </div>
