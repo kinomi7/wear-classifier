@@ -27,7 +27,7 @@ function DraggableImage({ id, src, size = 160 }) {
         transform: transform
             ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
             : undefined,
-        touchAction: "none",
+        touchAction: "pan-y",
         borderRadius: 6,
         cursor: "grab"
     };
