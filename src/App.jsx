@@ -240,7 +240,7 @@ const classifiedCount = Object.keys(labels).length;
                             ))}
                     </UnclassifiedArea>
 
-                    <h2 style={{ marginTop: 40 }}>画像分類領域</h2>
+                    <h2 style={{ marginTop: 40 }}>画像分類領域（{classifiedCount}枚）</h2>
 
                     <div
                         style={{
