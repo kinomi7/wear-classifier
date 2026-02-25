@@ -16,12 +16,12 @@ const isMen = params.get("mode") === "men";
 
 /* 🔥 カテゴリをモード別に */
 const CATEGORIES = isMen
-    ? ["a","b","c","d","e","f","g","h","i"]  // 3×3
+    ? ["a", "b", "c", "d", "e", "f", "g", "h", "i"]  // 3×3
     : [
-        "a","b","c","d","e",
-        "f","g","h","i","j",
-        "k","l","m","n","o"
-      ]; // 5×3
+        "a", "b", "c", "d", "e",
+        "f", "g", "h", "i", "j",
+        "k", "l", "m", "n", "o"
+    ]; // 5×3
 
 /* 🔥 CSV切替 */
 const CSV_FILE = isMen
@@ -280,7 +280,7 @@ export default function App() {
                                 width: 1150,
                                 display: "grid",
                                 gridTemplateColumns: isMen
-                                    ? "repeat(3, 1.5fr)"
+                                    ? "repeat(3, 1fr)"
                                     : "repeat(5, 1fr)",
                                 gridTemplateRows: isMen
                                     ? "repeat(3, 220px)"
@@ -298,6 +298,37 @@ export default function App() {
                                 </DroppableCell>
                             ))}
                         </div>
+                    </div>
+
+                    <div style={{ marginTop: 40, textAlign: "center" }}>
+                        <button
+                            onClick={() => {
+                                let csv = "image_url,category\n";
+
+                                images.forEach(url => {
+                                    csv += `${url},${labels[url] || ""}\n`;
+                                });
+
+                                const blob = new Blob([csv], { type: "text/csv" });
+                                const a = document.createElement("a");
+                                a.href = URL.createObjectURL(blob);
+
+                                // 🔥 モード別ファイル名
+                                a.download = isMen
+                                    ? "classified_outfits_men.csv"
+                                    : "classified_outfits_women.csv";
+
+                                a.click();
+                                URL.revokeObjectURL(a.href);
+                            }}
+                            style={{
+                                padding: "10px 20px",
+                                fontSize: 16,
+                                cursor: "pointer"
+                            }}
+                        >
+                            CSVとして保存
+                        </button>
                     </div>
 
                 </div>
