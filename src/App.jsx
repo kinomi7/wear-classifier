@@ -152,6 +152,49 @@ export default function App() {
     const [images, setImages] = useState([]);
     const [labels, setLabels] = useState({});
     const [activeId, setActiveId] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+
+    // 🔥 保存データを復元
+    useEffect(() => {
+        if (images.length === 0) return;
+
+        const saved = localStorage.getItem("wear_labels");
+
+        if (saved) {
+            const parsed = JSON.parse(saved);
+
+            const filtered = {};
+            images.forEach(url => {
+                if (parsed[url]) {
+                    filtered[url] = parsed[url];
+                }
+            });
+
+            setLabels(filtered);
+        }
+
+        // 🔥 復元完了フラグON
+        setIsLoaded(true);
+
+    }, [images]);
+
+
+    useEffect(() => {
+        if (!isLoaded) return;   // 🔥 ここが重要
+        localStorage.setItem("wear_labels", JSON.stringify(labels));
+    }, [labels, isLoaded]);
+
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 150,
+                tolerance: 5
+            }
+        })
+    );
 
     useEffect(() => {
         fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
@@ -166,40 +209,6 @@ export default function App() {
     if (images.length === 0) return <div>loading...</div>;
     const unclassifiedCount = images.filter(url => !labels[url]).length;
     const classifiedCount = Object.keys(labels).length;
-
-    // 🔥 保存データを復元
-    useEffect(() => {
-        const saved = localStorage.getItem("wear_labels");
-        if (saved) {
-            const parsed = JSON.parse(saved);
-
-            // いま存在する画像だけ復元
-            const filtered = {};
-            Object.keys(parsed).forEach(key => {
-                if (images.includes(key)) {
-                    filtered[key] = parsed[key];
-                }
-            });
-
-            setLabels(filtered);
-        }
-    }, [images]);
-
-    // 🔥 labelsが変わるたび自動保存
-    useEffect(() => {
-        localStorage.setItem("wear_labels", JSON.stringify(labels));
-    }, [labels]);
-
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(TouchSensor, {
-            activationConstraint: {
-                delay: 150,
-                tolerance: 5
-            }
-        })
-    );
-
 
     return (
         <DndContext
