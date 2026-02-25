@@ -201,7 +201,11 @@ export default function App() {
             .then(res => res.text())
             .then(text => {
                 const lines = text.trim().split("\n").slice(1);
-                const data = lines.map(l => l.trim()).filter(Boolean);
+                const data = lines
+                    .map(l => l.trim())
+                    .filter(Boolean)
+                    .map(path => `${import.meta.env.BASE_URL}${path}`);
+
                 setImages(data);
             });
     }, []);
