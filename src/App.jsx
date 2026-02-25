@@ -153,6 +153,20 @@ export default function App() {
     const [labels, setLabels] = useState({});
     const [activeId, setActiveId] = useState(null);
 
+    useEffect(() => {
+        fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
+            .then(res => res.text())
+            .then(text => {
+                const lines = text.trim().split("\n").slice(1);
+                const data = lines.map(l => l.trim()).filter(Boolean);
+                setImages(data);
+            });
+    }, []);
+
+    if (images.length === 0) return <div>loading...</div>;
+    const unclassifiedCount = images.filter(url => !labels[url]).length;
+    const classifiedCount = Object.keys(labels).length;
+
     // 🔥 保存データを復元
     useEffect(() => {
         const saved = localStorage.getItem("wear_labels");
@@ -185,20 +199,6 @@ export default function App() {
             }
         })
     );
-
-    useEffect(() => {
-        fetch(`${import.meta.env.BASE_URL}wear_images_women.csv`)
-            .then(res => res.text())
-            .then(text => {
-                const lines = text.trim().split("\n").slice(1);
-                const data = lines.map(l => l.trim()).filter(Boolean);
-                setImages(data);
-            });
-    }, []);
-
-    if (images.length === 0) return <div>loading...</div>;
-    const unclassifiedCount = images.filter(url => !labels[url]).length;
-    const classifiedCount = Object.keys(labels).length;
 
 
     return (
