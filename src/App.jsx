@@ -1,4 +1,4 @@
-import {useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
     DndContext,
     useDraggable,
@@ -153,6 +153,29 @@ export default function App() {
     const [labels, setLabels] = useState({});
     const [activeId, setActiveId] = useState(null);
 
+    // 🔥 保存データを復元
+    useEffect(() => {
+        const saved = localStorage.getItem("wear_labels");
+        if (saved) {
+            const parsed = JSON.parse(saved);
+
+            // いま存在する画像だけ復元
+            const filtered = {};
+            Object.keys(parsed).forEach(key => {
+                if (images.includes(key)) {
+                    filtered[key] = parsed[key];
+                }
+            });
+
+            setLabels(filtered);
+        }
+    }, [images]);
+
+    // 🔥 labelsが変わるたび自動保存
+    useEffect(() => {
+        localStorage.setItem("wear_labels", JSON.stringify(labels));
+    }, [labels]);
+
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(TouchSensor, {
@@ -175,7 +198,7 @@ export default function App() {
 
     if (images.length === 0) return <div>loading...</div>;
     const unclassifiedCount = images.filter(url => !labels[url]).length;
-const classifiedCount = Object.keys(labels).length;
+    const classifiedCount = Object.keys(labels).length;
 
 
     return (
