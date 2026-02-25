@@ -10,8 +10,9 @@ import {
     TouchSensor
 } from "@dnd-kit/core";
 
-/* 🔥 モード判定追加（これだけ増えます） */
-const isMen = window.location.pathname.includes("men");
+/* 🔥 モード判定追加 */
+const params = new URLSearchParams(window.location.search);
+const isMen = params.get("mode") === "men";
 
 /* 🔥 カテゴリをモード別に */
 const CATEGORIES = isMen
