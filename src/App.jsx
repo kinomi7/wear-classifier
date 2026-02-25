@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
     DndContext,
     useDraggable,
@@ -10,35 +10,32 @@ import {
     TouchSensor
 } from "@dnd-kit/core";
 
-/* ---------------- モード判定 ---------------- */
-
+/* 🔥 モード判定追加（これだけ増えます） */
 const isMen = window.location.pathname.includes("men");
 
-/* ---------------- モード別設定 ---------------- */
+/* 🔥 カテゴリをモード別に */
+const CATEGORIES = isMen
+    ? ["a","b","c","d","e","f","g","h","i"]  // 3×3
+    : [
+        "a","b","c","d","e",
+        "f","g","h","i","j",
+        "k","l","m","n","o"
+      ]; // 5×3
 
-const CONFIG = isMen
-    ? {
-        mode: "men",
-        csv: "wear_images_men.csv",
-        categories: ["a", "b", "c", "d", "e", "f", "g", "h", "i"], // 3×3=9
-        gridCols: 3
-    }
-    : {
-        mode: "women",
-        csv: "wear_images_women.csv",
-        categories: [
-            "a", "b", "c", "d", "e",
-            "f", "g", "h", "i", "j",
-            "k", "l", "m", "n", "o"
-        ], // 5×3=15
-        gridCols: 5
-    };
+/* 🔥 CSV切替 */
+const CSV_FILE = isMen
+    ? "wear_images_men.csv"
+    : "wear_images_women.csv";
 
-const STORAGE_KEY = `labels_${CONFIG.mode}`;
+/* 🔥 保存キー切替 */
+const STORAGE_KEY = isMen
+    ? "wear_labels_men"
+    : "wear_labels_women";
 
-/* ---------------- draggable ---------------- */
 
-function DraggableImage({ id, src, size }) {
+/* ---------------- draggable image ---------------- */
+
+function DraggableImage({ id, src, size = 160 }) {
     const { attributes, listeners, setNodeRef, transform } =
         useDraggable({ id });
 
@@ -63,7 +60,7 @@ function DraggableImage({ id, src, size }) {
     );
 }
 
-/* ---------------- droppable ---------------- */
+/* ---------------- droppable cell ---------------- */
 
 function DroppableCell({ id, children }) {
     const { setNodeRef } = useDroppable({ id });
@@ -76,8 +73,9 @@ function DroppableCell({ id, children }) {
                 height: 220,
                 border: "2px solid #888",
                 overflowY: "auto",
-                padding: 8,
-                background: "#fafafa"
+                background: "#fafafa",
+                boxSizing: "border-box",
+                padding: 8
             }}
         >
             {children}
@@ -85,35 +83,114 @@ function DroppableCell({ id, children }) {
     );
 }
 
-/* ---------------- 未分類 ---------------- */
+/* ---------------- 未分類 droppable ---------------- */
 
 function UnclassifiedArea({ children }) {
     const { setNodeRef } = useDroppable({ id: "unclassified" });
+    const scrollRef = useRef(null);
+    const [maxScroll, setMaxScroll] = useState(0);
+    const [scrollValue, setScrollValue] = useState(0);
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        const update = () => {
+            setMaxScroll(el.scrollWidth - el.clientWidth);
+        };
+
+        update();
+        window.addEventListener("resize", update);
+        return () => window.removeEventListener("resize", update);
+    }, [children]);
+
+    const handleScroll = () => {
+        const el = scrollRef.current;
+        if (!el) return;
+        setScrollValue(el.scrollLeft);
+    };
+
+    const handleSliderChange = (e) => {
+        const value = Number(e.target.value);
+        setScrollValue(value);
+        if (scrollRef.current) {
+            scrollRef.current.scrollLeft = value;
+        }
+    };
 
     return (
-        <div style={{ overflowX: "auto", padding: "10px 0" }}>
+        <div style={{ width: "100%" }}>
             <div
-                ref={setNodeRef}
+                ref={scrollRef}
+                onScroll={handleScroll}
                 style={{
-                    display: "flex",
-                    gap: 12,
-                    padding: "0 20px",
-                    width: "max-content"
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    border: "1px solid #ccc",
+                    padding: "10px 0",
+                    boxSizing: "border-box"
                 }}
             >
-                {children}
+                <div
+                    ref={setNodeRef}
+                    style={{
+                        display: "flex",
+                        gap: 12,
+                        padding: "0 20px",
+                        width: "max-content",
+                        minHeight: 180
+                    }}
+                >
+                    {children}
+                </div>
             </div>
+
+            <input
+                type="range"
+                min="0"
+                max={maxScroll}
+                value={scrollValue}
+                onChange={handleSliderChange}
+                style={{
+                    width: "100%",
+                    marginTop: 8
+                }}
+            />
         </div>
     );
 }
 
-/* ---------------- main ---------------- */
+
+/* ---------------- main app ---------------- */
 
 export default function App() {
     const [images, setImages] = useState([]);
     const [labels, setLabels] = useState({});
     const [activeId, setActiveId] = useState(null);
-    const [loaded, setLoaded] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    /* 🔥 保存復元（キー変更のみ） */
+    useEffect(() => {
+        if (images.length === 0) return;
+
+        const saved = localStorage.getItem(STORAGE_KEY);
+
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            const filtered = {};
+            images.forEach(url => {
+                if (parsed[url]) filtered[url] = parsed[url];
+            });
+            setLabels(filtered);
+        }
+
+        setIsLoaded(true);
+    }, [images]);
+
+    useEffect(() => {
+        if (!isLoaded) return;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(labels));
+    }, [labels, isLoaded]);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -122,62 +199,36 @@ export default function App() {
         })
     );
 
-    /* -------- CSV読み込み -------- */
-
+    /* 🔥 CSV切替 */
     useEffect(() => {
-        fetch(`${import.meta.env.BASE_URL}${CONFIG.csv}`)
+        fetch(`${import.meta.env.BASE_URL}${CSV_FILE}`)
             .then(res => res.text())
             .then(text => {
                 const lines = text.trim().split("\n").slice(1);
-
                 const data = lines
                     .map(l => l.trim())
                     .filter(Boolean)
                     .map(path => `${import.meta.env.BASE_URL}${path}`);
-
                 setImages(data);
             });
     }, []);
 
-    /* -------- 復元 -------- */
-
-    useEffect(() => {
-        if (images.length === 0) return;
-
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            const filtered = {};
-
-            images.forEach(url => {
-                if (parsed[url]) filtered[url] = parsed[url];
-            });
-
-            setLabels(filtered);
-        }
-
-        setLoaded(true);
-    }, [images]);
-
-    /* -------- 保存 -------- */
-
-    useEffect(() => {
-        if (!loaded) return;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(labels));
-    }, [labels, loaded]);
-
     if (images.length === 0) return <div>loading...</div>;
 
-    const unclassified = images.filter(url => !labels[url]);
-    const classified = Object.keys(labels).length;
+    const unclassifiedCount = images.filter(url => !labels[url]).length;
+    const classifiedCount = Object.keys(labels).length;
 
     return (
         <DndContext
             sensors={sensors}
-            onDragStart={e => setActiveId(e.active.id)}
-            onDragEnd={e => {
-                const { active, over } = e;
-                if (!over) return setActiveId(null);
+            onDragStart={(event) => setActiveId(event.active.id)}
+            onDragEnd={(event) => {
+                const { active, over } = event;
+
+                if (!over) {
+                    setActiveId(null);
+                    return;
+                }
 
                 if (over.id === "unclassified") {
                     setLabels(prev => {
@@ -195,55 +246,65 @@ export default function App() {
                 setActiveId(null);
             }}
         >
-            <div style={{ padding: 20, maxWidth: 1200, margin: "0 auto" }}>
-                <h2>未分類（{unclassified.length}）</h2>
+            <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                <div style={{ width: "100%", maxWidth: 1400, padding: 20 }}>
 
-                <UnclassifiedArea>
-                    {unclassified.map(url => (
-                        <DraggableImage
-                            key={url}
-                            id={url}
-                            src={url}
-                            size={160}
-                        />
-                    ))}
-                </UnclassifiedArea>
+                    <h2>未分類画像（{unclassifiedCount}枚）</h2>
 
-                <h2 style={{ marginTop: 40 }}>
-                    分類済み（{classified}）
-                </h2>
+                    <UnclassifiedArea>
+                        {images
+                            .filter(url => !labels[url])
+                            .map(url => (
+                                <DraggableImage key={url} id={url} src={url} size={160} />
+                            ))}
+                    </UnclassifiedArea>
 
-                <div style={{ marginTop: 20, padding: 40 }}>
+                    <h2 style={{ marginTop: 40 }}>
+                        画像分類領域（{classifiedCount}枚）
+                    </h2>
+
                     <div
                         style={{
-                            display: "grid",
-                            gridTemplateColumns: `repeat(${CONFIG.gridCols}, 1fr)`,
-                            gridAutoRows: "220px",
-                            gap: 15,
-                            justifyItems: "center"
+                            width: 1170,
+                            margin: "0 auto",
+                            padding: "60px 70px",
+                            backgroundImage: `url(${import.meta.env.BASE_URL}grid-bg.png)`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat"
                         }}
                     >
-                        {CONFIG.categories.map(cat => (
-                            <DroppableCell key={cat} id={cat}>
-                                {Object.entries(labels)
-                                    .filter(([_, c]) => c === cat)
-                                    .map(([url]) => (
-                                        <DraggableImage
-                                            key={url}
-                                            id={url}
-                                            src={url}
-                                            size={70}
-                                        />
-                                    ))}
-                            </DroppableCell>
-                        ))}
+                        <div
+                            style={{
+                                width: 1150,
+                                display: "grid",
+                                gridTemplateColumns: isMen
+                                    ? "repeat(3, 1fr)"
+                                    : "repeat(5, 1fr)",
+                                gridTemplateRows: isMen
+                                    ? "repeat(3, 220px)"
+                                    : "repeat(3, 220px)",
+                                gap: 15
+                            }}
+                        >
+                            {CATEGORIES.map(cat => (
+                                <DroppableCell key={cat} id={cat}>
+                                    {Object.entries(labels)
+                                        .filter(([_, c]) => c === cat)
+                                        .map(([url]) => (
+                                            <DraggableImage key={url} id={url} src={url} size={70} />
+                                        ))}
+                                </DroppableCell>
+                            ))}
+                        </div>
                     </div>
+
                 </div>
             </div>
 
             <DragOverlay>
                 {activeId && (
-                    <img src={activeId} style={{ width: 160 }} />
+                    <img src={activeId} style={{ width: 160, borderRadius: 6 }} />
                 )}
             </DragOverlay>
         </DndContext>
