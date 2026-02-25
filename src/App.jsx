@@ -280,7 +280,7 @@ export default function App() {
                                 width: 1150,
                                 display: "grid",
                                 gridTemplateColumns: isMen
-                                    ? "repeat(3, 1fr)"
+                                    ? "repeat(3, 1.5fr)"
                                     : "repeat(5, 1fr)",
                                 gridTemplateRows: isMen
                                     ? "repeat(3, 220px)"
